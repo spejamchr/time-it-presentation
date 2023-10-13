@@ -4,434 +4,428 @@ background: https://source.unsplash.com/collection/94734566/1920x1080
 class: text-center
 highlighter: shiki
 lineNumbers: false
-info: |
-  ## Slidev Starter Template
-  Presentation slides for developers.
-
-  Learn more at [Sli.dev](https://sli.dev)
+info: A lightning talk on benchmarking
 drawings:
   persist: true
-transition: slide-left
-title: Welcome to Slidev
+title: TimeIt
 mdc: true
----
-
-# Welcome to Slidev
-
-Presentation slides for developers
-
-<div class="pt-12">
-  <span @click="$slidev.nav.next" class="px-2 py-1 rounded cursor-pointer" hover="bg-white bg-opacity-10">
-    Press Space for next page <carbon:arrow-right class="inline"/>
-  </span>
-</div>
-
-<div class="abs-br m-6 flex gap-2">
-  <button @click="$slidev.nav.openInEditor()" title="Open in Editor" class="text-xl slidev-icon-btn opacity-50 !border-none !hover:text-white">
-    <carbon:edit />
-  </button>
-  <a href="https://github.com/slidevjs/slidev" target="_blank" alt="GitHub"
-    class="text-xl slidev-icon-btn opacity-50 !border-none !hover:text-white">
-    <carbon-logo-github />
-  </a>
-</div>
-
-<!--
-The last comment block of each slide will be treated as slide notes. It will be visible and editable in Presenter Mode along with the slide. [Read more in the docs](https://sli.dev/guide/syntax.html#notes)
--->
-
----
-transition: fade-out
----
-
-# What is Slidev?
-
-Slidev is a slides maker and presenter designed for developers, consist of the following features
-
-- 📝 **Text-based** - focus on the content with Markdown, and then style them later
-- 🎨 **Themable** - theme can be shared and used with npm packages
-- 🧑‍💻 **Developer Friendly** - code highlighting, live coding with autocompletion
-- 🤹 **Interactive** - embedding Vue components to enhance your expressions
-- 🎥 **Recording** - built-in recording and camera view
-- 📤 **Portable** - export into PDF, PNGs, or even a hostable SPA
-- 🛠 **Hackable** - anything possible on a webpage
-
-<br>
-<br>
-
-Read more about [Why Slidev?](https://sli.dev/guide/why)
-
-<!--
-You can have `style` tag in markdown to override the style for the current page.
-Learn more: https://sli.dev/guide/syntax#embedded-styles
--->
-
-<style>
-h1 {
-  background-color: #2B90B6;
-  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
-  background-size: 100%;
-  -webkit-background-clip: text;
-  -moz-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  -moz-text-fill-color: transparent;
-}
-</style>
-
-<!--
-Here is another comment.
--->
-
----
-layout: default
----
-
-# Table of contents
-
-```html
-<Toc minDepth="1" maxDepth="1"></Toc>
-```
-
-<Toc maxDepth="1"></Toc>
-
----
+fonts:
+  sans: 'Arial'
+  serif: 'Robot Slab'
+  mono: 'Fira Code'
 transition: slide-up
-level: 2
 ---
 
-# Navigation
+# TimeIt
 
-Hover on the bottom-left corner to see the navigation's controls panel, [learn more](https://sli.dev/guide/navigation.html)
-
-### Keyboard Shortcuts
-
-|     |     |
-| --- | --- |
-| <kbd>right</kbd> / <kbd>space</kbd>| next animation or slide |
-| <kbd>left</kbd>  / <kbd>shift</kbd><kbd>space</kbd> | previous animation or slide |
-| <kbd>up</kbd> | previous slide |
-| <kbd>down</kbd> | next slide |
-
-<!-- https://sli.dev/guide/animations.html#click-animations -->
-<img
-  v-click
-  class="absolute -bottom-9 -left-7 w-80 opacity-50"
-  src="https://sli.dev/assets/arrow-bottom-left.svg"
-/>
-<p v-after class="absolute bottom-23 left-45 opacity-30 transform -rotate-10">Here!</p>
-
-<!--
-hi there
--->
+A benchmarking story
 
 ---
-layout: image-right
-image: https://source.unsplash.com/collection/94734566/1920x1080
+
+# Why?
+
+Benchmarking should have a reason
+
+Our `EnterprisePortal::UseCasePersistenceService#save` was timing out, and [@salsa] wanted to know
+which part exactly was the slow bit.
+
+[@salsa]: https://execonline.slack.com/team/U010TE2D1R9
+
+---
+transition: slide-left
 ---
 
-# Code
+# First Idea
 
-Use code snippets and get the highlighting directly![^1]
+Write some code to time all the functions real quick
 
-```ts {all|2|1-6|9|all}
-interface User {
-  id: number
-  firstName: string
-  lastName: string
-  role: string
-}
+<v-clicks>
 
-function updateUser(id: number, update: User) {
-  const user = getUser(id)
-  const newUser = { ...user, ...update }
-  saveUser(id, newUser)
-}
+- I can store of all the times in an instance variable
+- I can write a simple method that captures the body of a function in a block
+- The capturing method runs the block and stores the time to my list of times
+
+</v-clicks>
+
+---
+transition: slide-left
+---
+
+# Block Capture 
+
+Implementation (directly  in the class)
+
+```ruby {3,6-12,15-17}
+def initialize(arguments)
+  # ... Skipping some stuff
+  @benchmarks = []                                      # Store the data here.
+end
+
+def timeit(method)                                      # Use this method to time other methods.
+  a = Time.now
+  result = yield                                        # Call `yield` to call the passed block.
+  b = Time.now
+  @benchmarks << { method => b - a }                    # Store the timing data.
+  result                                                # Return the original result.
+end
 ```
 
-<arrow v-click="[3, 4]" x1="400" y1="420" x2="230" y2="330" color="#564" width="3" arrowSize="1" />
-
-[^1]: [Learn More](https://sli.dev/guide/syntax.html#line-highlighting)
-
-<style>
-.footnotes-sep {
-  @apply mt-20 opacity-10;
-}
-.footnotes {
-  @apply text-sm opacity-75;
-}
-.footnote-backref {
-  display: none;
-}
-</style>
-
+---
+transition: slide-left
 ---
 
-# Components
+# Block Capture 
 
-<div grid="~ cols-2 gap-4">
-<div>
+Usage
 
-You can use Vue components directly inside your slides.
-
-We have provided a few built-in components like `<Tweet/>` and `<Youtube/>` that you can use directly. And adding your custom components is also super easy.
-
-```html
-<Counter :count="10" />
+```ruby {2-5}
+def save
+  timeit :save do                                       # Call `#timeit` inside the method, and pass it a block.
+    # Actual method here                                # The block contains the original method's definition.
+  end
+end
 ```
 
-<!-- ./components/Counter.vue -->
-<Counter :count="10" m="t-4" />
+---
 
-Check out [the guides](https://sli.dev/builtin/components.html) for more.
+# Block Capture
 
-</div>
-<div>
+Thoughts
 
-```html
-<Tweet id="1390115482657726468" />
+<v-click>
+
+Pros:
+
+- Easy to implement the `timeit` method
+
+</v-click>
+<v-click>
+
+Cons:
+
+- If the method has an early return, the `return` needs to be replaced with `next` so that it
+  behaves as expected inside the block.
+
+```ruby {3,5,6}
+def validate_permission_type_change(params)
+  timeit __method__ do
+    next if new_record                                                          # This
+    permission_type_param = params.fetch(:permission_type)
+    next if use_case.permission_type == permission_type_param                   # was
+    next if user.can_update_permission_type?(use_case)                          # annoying.
+    use_case.errors.add(:permission_type, "Permission type cannot be changed")
+  end
+end
 ```
 
-<Tweet id="1390115482657726468" scale="0.65" />
-
-</div>
-</div>
-
-<!--
-Presenter note with **bold**, *italic*, and ~~striked~~ text.
-
-Also, HTML elements are valid:
-<div class="flex w-full">
-  <span style="flex-grow: 1;">Left content</span>
-  <span>Right content</span>
-</div>
--->
-
+</v-click>
 
 ---
-class: px-20
+transition: slide-left
 ---
 
-# Themes
+# Second Idea
 
-Slidev comes with powerful theming support. Themes can provide styles, layouts, components, or even configurations for tools. Switching between themes by just **one edit** in your frontmatter:
+Use a decorator like `Memorb`, which lets us memoize a method by prefixing it with `memoize`
 
-<div grid="~ cols-2 gap-2" m="-t-2">
+<v-clicks>
 
-```yaml
+- I can still store of all the times in an instance variable
+- I can write a decorating method that aliases the original method
+- The decorator method runs the original method and stores the time in my list of times
+
+</v-clicks>
+
 ---
-theme: default
+transition: slide-left
 ---
+
+# Decorator
+
+Implementation
+
+```ruby {3,6-17}
+def initialize(arguments)
+  # ... Skipping some stuff
+  @benchmarks = []                                      # Continue storing the data here.
+end
+
+def self.timeit(method)                                 # Now this is a class method.
+  aliased = "aliased_#{method}".to_sym                  # Make an alias version of the method 
+  alias_method aliased, method                          # (like a backup of the original).
+
+  define_method(method) do |*args, &block|              # Redefine the given method.
+    a = Time.now
+    result = send(aliased, *args, &block)               # Time the alias/backup version with `#send`.
+    b = Time.now
+    @benchmarks << { method => b - a }                  # Store the timing data.
+    result                                              # Return the original result.
+  end
+end
 ```
 
-```yaml
 ---
-theme: seriph
+transition: slide-left
 ---
+
+# Decorator
+
+Usage
+
+```ruby
+timeit def save                                         # Call `timeit` outside the method now.
+  # Actual method here                                  # The inside of the method stays the same.
+end
 ```
 
-<img border="rounded" src="https://github.com/slidevjs/themes/blob/main/screenshots/theme-default/01.png?raw=true">
-
-<img border="rounded" src="https://github.com/slidevjs/themes/blob/main/screenshots/theme-seriph/01.png?raw=true">
-
-</div>
-
-Read more about [How to use a theme](https://sli.dev/themes/use.html) and
-check out the [Awesome Themes Gallery](https://sli.dev/themes/gallery.html).
-
 ---
-preload: false
+transition: slide-left
 ---
 
-# Animations
+# Decorator
 
-Animations are powered by [@vueuse/motion](https://motion.vueuse.org/).
+Thoughts
 
-```html
-<div
-  v-motion
-  :initial="{ x: -80 }"
-  :enter="{ x: 0 }">
-  Slidev
-</div>
+<v-click>
+
+Pros
+
+- Don't have to change the method body
+- Don't have to write the name of the method I'm timing
+
+</v-click>
+<v-click>
+
+Cons
+
+- Figuring out the method aliasing was confusing
+- I wanted to time *all* the methods in the class, and prefixing each one was annoying.
+
+</v-click>
+
+---
+
+# Decorator
+
+Results
+
+This second implementation was plenty to get the results I needed. The slow method, `#save`, took
+about 13.5s in my test case, and the timing code showed that the particularly slow portion was
+`#assign_programs_and_extensions` (13.4s) and within that `#assign_programs` (10.3s).
+
+<v-click>
+
+But I still wanted a more ergonomic timing solution...
+
+</v-click>
+
+---
+transition: none
+---
+
+# Third Idea
+
+Make a `TimeIt` module that times *all* methods just by including it in a class
+
+<v-clicks>
+
+- When the module is included I can list all the class's instance methods & decorate them
+- How to run code when a module is included?
+- Use the `included` hook
+- But at that point I only have access to methods already defined...
+
+</v-clicks>
+
+<v-after>
+
+```ruby {3,7,9}
+class Demo
+
+  def first_method                                      # TimeIt#included can see this
+    # stuff
+  end
+
+  include TimeIt
+
+  def second_method                                     # TimeIt#included can't see this :(
+    # other stuff
+  end
+end
 ```
 
-<div class="w-60 relative mt-6">
-  <div class="relative w-40 h-40">
-    <img
-      v-motion
-      :initial="{ x: 800, y: -100, scale: 1.5, rotate: -50 }"
-      :enter="final"
-      class="absolute top-0 left-0 right-0 bottom-0"
-      src="https://sli.dev/logo-square.png"
-    />
-    <img
-      v-motion
-      :initial="{ y: 500, x: -100, scale: 2 }"
-      :enter="final"
-      class="absolute top-0 left-0 right-0 bottom-0"
-      src="https://sli.dev/logo-circle.png"
-    />
-    <img
-      v-motion
-      :initial="{ x: 600, y: 400, scale: 2, rotate: 100 }"
-      :enter="final"
-      class="absolute top-0 left-0 right-0 bottom-0"
-      src="https://sli.dev/logo-triangle.png"
-    />
-  </div>
-
-  <div
-    class="text-5xl absolute top-14 left-40 text-[#2B90B6] -z-1"
-    v-motion
-    :initial="{ x: -80, opacity: 0}"
-    :enter="{ x: 0, opacity: 1, transition: { delay: 2000, duration: 1000 } }">
-    Slidev
-  </div>
-</div>
-
-<!-- vue script setup scripts can be directly used in markdown, and will only affects current page -->
-<script setup lang="ts">
-const final = {
-  x: 0,
-  y: 0,
-  rotate: 0,
-  scale: 1,
-  transition: {
-    type: 'spring',
-    damping: 10,
-    stiffness: 20,
-    mass: 2
-  }
-}
-</script>
-
-<div
-  v-motion
-  :initial="{ x:35, y: 40, opacity: 0}"
-  :enter="{ y: 0, opacity: 1, transition: { delay: 3500 } }">
-
-[Learn More](https://sli.dev/guide/animations.html#motion)
-
-</div>
+</v-after>
 
 ---
-
-# LaTeX
-
-LaTeX is supported out-of-box powered by [KaTeX](https://katex.org/).
-
-<br>
-
-Inline $\sqrt{3x-1}+(1+x)^2$
-
-Block
-$$ {1|3|all}
-\begin{array}{c}
-
-\nabla \times \vec{\mathbf{B}} -\, \frac1c\, \frac{\partial\vec{\mathbf{E}}}{\partial t} &
-= \frac{4\pi}{c}\vec{\mathbf{j}}    \nabla \cdot \vec{\mathbf{E}} & = 4 \pi \rho \\
-
-\nabla \times \vec{\mathbf{E}}\, +\, \frac1c\, \frac{\partial\vec{\mathbf{B}}}{\partial t} & = \vec{\mathbf{0}} \\
-
-\nabla \cdot \vec{\mathbf{B}} & = 0
-
-\end{array}
-$$
-
-<br>
-
-[Learn more](https://sli.dev/guide/syntax#latex)
-
+transition: slide-left
 ---
 
-# Diagrams
+# Third Idea
 
-You can create diagrams / graphs from textual descriptions, directly in your Markdown.
+Make a `TimeIt` module that times *all* methods just by including it in a class
 
-<div class="grid grid-cols-4 gap-5 pt-4 -mb-6">
+- When the module is included I can list all the class's instance methods & decorate them
+- How to run code when a module is included?
+- Use the `included` hook
+- But at that point I only have access to methods already defined...
+- Can I run code when a new method on the class is defined?
 
-```mermaid {scale: 0.5}
-sequenceDiagram
-    Alice->John: Hello John, how are you?
-    Note over Alice,John: A typical interaction
+<v-clicks>
+
+- Yes, Ruby has a `method_added` hook
+- But my decorator defines method aliases, which will trigger `method_added` and recursively call my
+  decorator...
+- So I need to keep track of which methods I've decorated
+- If I'm decorating *all* methods, how do I handle `#send`? (My decorator has been using it to  
+  call the aliased original method.)
+- I can use Ruby's `::Method` class to get an unbound `#send` method and bind it to the  
+  decorated object
+
+</v-clicks>
+
+
+---
+transition: slide-left
+---
+
+# Module
+
+Implementation (highlights)
+
+- `#included`
+```ruby
+def included(base)
+  Helpers.decoratable_methods(base).each do |method|    # All instance methods on the base
+    Helpers.decorate_as_timed(base, method) }           # Implementation on next slide...
+  end
+end
 ```
 
-```mermaid {theme: 'neutral', scale: 0.8}
-graph TD
-B[Text] --> C{Decision}
-C -->|One| D[Result 1]
-C -->|Two| E[Result 2]
+<v-click>
+
+- `#method_added`
+
+```ruby
+def method_added(method)                                # Runs any time a new method is defined.
+  super                                                 # Be polite. Call `super` when appropriate.
+  Helpers.decorate_as_timed(self, method)               # Reusing this logic here.
+end
 ```
 
-```mermaid
-mindmap
-  root((mindmap))
-    Origins
-      Long history
-      ::icon(fa fa-book)
-      Popularisation
-        British popular psychology author Tony Buzan
-    Research
-      On effectivness<br/>and features
-      On Automatic creation
-        Uses
-            Creative techniques
-            Strategic planning
-            Argument mapping
-    Tools
-      Pen and paper
-      Mermaid
+</v-click>
+
+---
+transition: slide-left
+---
+
+# Module
+
+Implementation (more highlights)
+
+- `#decorate_as_timed`
+
+```ruby
+def decorate_as_timed(base, method)
+  return if already_timed?(base, method)                # Prevent re-decorating methods...
+
+  record_as_timed(base, method)                         # ...by keeping a list.
+
+  aliased = [PREFIX, method].join.to_sym                # Create a method alias
+  base.alias_method aliased, method                     # of the original method
+  base.__send__(:private, aliased)                      # and make it private.
+  define_decorated_method(base, method, aliased)        # Implementation on next slide...
+end
 ```
 
-```plantuml {scale: 0.7}
-@startuml
+---
+transition: slide-left
+---
 
-package "Some Group" {
-  HTTP - [First Component]
-  [Another Component]
-}
+# Module
 
-node "Other Groups" {
-  FTP - [Second Component]
-  [First Component] --> FTP
-}
+Implementation (last highlights)
 
-cloud {
-  [Example 1]
-}
+- `#define_decorated_method`
 
+```ruby
+def define_decorated_method(base, method, aliased)
+  # Don't call any methods on `self` while defining the decorated method,
+  # including `#__send__`, since they could be decorated and cause a
+  # recursive stack overflow. Use this `unbound_send` object to call the
+  # original `#__send__` method.
+  unbound_send = ::BasicObject.method(:__send__).unbind
 
-database "MySql" {
-  folder "This is my folder" {
-    [Folder 3]
-  }
-  frame "Foo" {
-    [Frame 4]
-  }
-}
-
-
-[Another Component] --> [Example 1]
-[Example 1] --> [Folder 3]
-[Folder 3] --> [Frame 4]
-
-@enduml
+  base.define_method(method) do |*args, &block|         # Define the decorated method.
+    bound_send = unbound_send.bind(self)                # Bind our `#__send__` method.
+    data = Helpers.timer(method) do                     # Use a `timer` helper to time the original
+      bound_send.call(aliased, *args, &block)           # method and give us helpful metadata.
+    end
+    (@__timings ||= []) << data.fetch(:timing)          # Store the timing metadata.
+    data.fetch(:result)                                 # Return the original result of the method.
+  end
+end
 ```
 
-</div>
-
-[Learn More](https://sli.dev/guide/syntax.html#diagrams)
-
 ---
-src: ./pages/multiple-entries.md
-hide: false
+transition: slide-left
 ---
 
+# Module
+
+Implementation (not shown)
+
+Several helper methods for doing little jobs:
+
+- Get timing info when running some block
+- Get all instance methods of a class
+- Keep track of which methods have already been decorated
+
 ---
-layout: center
-class: text-center
+transition: slide-left
 ---
 
-# Learn More
+# Module
 
-[Documentations](https://sli.dev) · [GitHub](https://github.com/slidevjs/slidev) · [Showcases](https://sli.dev/showcases.html)
+Usage
+
+```ruby {2}
+class UseCasePersistenceService
+  include TimeIt                                        # So simple!
+
+  # The rest of the class...
+end
+```
+
+---
+
+# Module
+
+Thoughts
+
+<v-click>
+
+Pros:
+
+- Easy to use
+- Fairly easy to extend the code
+- Fun to implement
+
+</v-click>
+<v-click>
+
+Cons:
+
+- Difficult to implement
+- More complex, so more prone to bugs
+
+</v-click>
+
+---
+
+# Notes
+
+- [@ecopony] came to the same timing conclusions and fixed the slowdown in the
+  `UseCasePersistenceService` in [#7755]. Tanks!
+
+[@ecopony]: https://execonline.slack.com/team/U0BRFK73P
+
+[#7755]: https://github.com/execonline-inc/exec_online/pull/7755
